@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Making it easier to ride SEPTA">
+    <meta name="author" content="PhillyBusFinder">
+    <link rel="shortcut icon" type="image/png" href="assets/img/favicon.png"/>
+    <title>PhillyBusFinder | Making it easier to ride SEPTA</title>
+    <!--<link href="assets/css/bootstrap.css" rel="stylesheet">-->
+    <!--<link href="assets/css/main.css" rel="stylesheet">-->
+    <link href="assets/css/busfinder.css" rel="stylesheet">
+    <link href="http://fonts.googleapis.com/css?family=Lato:300,400,900" rel="stylesheet" type="text/css">
+    <link href='http://fonts.googleapis.com/css?family=Source+Sans+Pro:200' rel='stylesheet' type='text/css'>
+
+     <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.7.2/leaflet.css" />
+
+    <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+      <script src="https://oss.maxcdn.com/libs/respond.js/1.3.0/respond.min.js"></script>
+    <![endif]-->
+  </head>
+  <body>
+    
+
+    <div id="map"></div>
+
+    <div id="container">
+
+      <div class="header">
+        <img src="assets/img/header_logo.png">
+      </div>
+      
+      <div class="zoom-control">
+        <div data-action="in">+</div>
+        <div data-action="out">-</div>
+      </div>
+
+      <div class="menu">
+        <span class="submenu">menu></span>
+        <span class="bradcrum">home > buses > #1241</span>
+      </div>
+
+
+      <div class="view bus-view">
+        <div class="title">Bus 1241</div>
+        <div class="left location">
+          <div class="label">Next Location</div>
+          <div class="data">34th and Market</div>
+        </div>
+        <div class="right arrival">
+          <div class="label">Next Arrival</div>
+          <div class="data">5:20 PM</div>
+        </div>
+        <div class="both delay">
+          <div class="label">Estimated Delay</div>
+          <div class="data">-3s</div>
+        </div>
+        <div class="both schedule">
+          <div class="label">Schedule</div>
+          <table>
+            <tr>
+              <td>36th and Market</td>
+              <td>5:25 PM</td>
+              <td>-3s</td>
+            </tr>
+             <tr>
+              <td>38th and Market</td>
+              <td>5:31 PM</td>
+              <td>-3s</td>
+            </tr>
+             <tr>
+              <td>40th and Market</td>
+              <td>5:35 PM</td>
+              <td>-5s</td>
+            </tr>
+          </table>
+        </div>
+      </div>
+
+
+      <div class="view stop-view">
+        <div class="title">324: Frankford/69th Street</div>
+        <div class="both bus">
+          <div class="label">Next Bus</div>
+          <div class="data">2342</div>
+        </div>
+        <div class="left arrival">
+          <div class="label">Next Arrival</div>
+          <div class="data">5:20 PM</div>
+        </div>
+        <div class="right delay">
+          <div class="label">Estimated Delay</div>
+          <div class="data">-3s</div>
+        </div>
+        <div class="both schedule">
+          <div class="label">Schedule</div>
+          <table>
+            <tr>
+              <td>Bus 2351</td>
+              <td>5:25 PM</td>
+              <td>-3s</td>
+            </tr>
+             <tr>
+              <td>Bus 3125</td>
+              <td>5:31 PM</td>
+              <td>-3s</td>
+            </tr>
+             <tr>
+              <td>Bus 1231</td>
+              <td>5:35 PM</td>
+              <td>-5s</td>
+            </tr>
+          </table>
+        </div>
+      </div>
+
+      <div class="view search-view">
+        
+        <div class="search-wrapper">
+          <input class="search" type="text" name="search"></input>
+          <div class="search-label">
+            Type an address near you
+          </div>
+          <div class="placeholder">
+            Type an address near you
+          </div>
+        </div>
+
+        <div class="results">
+          <div class="label">
+            Search Results
+          </div>
+          <div class="items">
+          </div>
+        </div>
+      </div>
+
+    </div>  
+
+    <script src="https://maps.googleapis.com/maps/api/js?v=3.exp&sensor=false"></script>
+    <script src="http://cdn.leafletjs.com/leaflet-0.7.2/leaflet.js"></script>
+    <script src="https://code.jquery.com/jquery-1.10.2.min.js"></script>
+    <script src="assets/js/bootstrap.js"></script>
+    <script src="assets/js/main.js"></script>
+    <script src="assets/js/busfinder.js"></script>
+  </body>
+</html>
