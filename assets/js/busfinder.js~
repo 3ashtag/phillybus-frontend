@@ -282,7 +282,7 @@ window.onpopstate = function() {
   var bulkPlot = function(list) {
     currentMarkers = list;
     for(var i in list) {
-      list[i].setOpacity(.5);
+      list[i].setOpacity(.6);
       map.addLayer(list[i]);
     }
   }  

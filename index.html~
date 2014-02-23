@@ -178,7 +178,7 @@
         </div>
         <div class="both links">
           <div class="label">Resources</div>
-          <div class="text">GitHub</div>
+          <div class="text">PhillyBusFinder is a tool that helps Philadelphia residents track SEPTA bus locations in realtime. This is accomplished by fetching open data from SEPTA that tracks bus locations.</div>
         </div>
         <div class="both members">
           <div class="label">Members</div>

@@ -119,7 +119,6 @@ body, html {
 }
 
 .view {
-  display: none;
 	width: 400px
 }
 
