@@ -119,7 +119,10 @@ body, html {
 }
 
 .view {
-	width: 400px
+  display: none;
+	width: 400px;
+  overflow-y: auto;
+  max-height: 410px;
 }
 
 .view .left {
@@ -163,7 +166,6 @@ body, html {
 }
 
 .view tr:hover {
-	background: rgba(100,255,255,.5);
 }
 
 .search-view { 
@@ -220,6 +222,8 @@ body, html {
 	display: none; 
 	opacity: 0;
 	transition: opacity .25s;
+  overflow-y: auto;
+  max-height: 345px;
 }
 
 .results .label {
@@ -235,5 +239,16 @@ body, html {
 }
 
 .results .items div:hover {
+	background: #eee;
+}
+
+.stops .items div, .recent-view .list div {
+	font-size: 17px;
+	cursor: pointer;
+	transition: background .25s;
+  padding: 5px 0;
+}
+
+.stops .items div:hover, .recent-view .list div:hover {
 	background: #eee;
 }

@@ -1,6 +1,18 @@
 var templates = {
-  resultItem: function(obj) {
-    return "<div data-src='[" + obj.lat + "," + obj.lon + "]'>" + obj.name + "</div>";
+  resultItem: function(obj, url) {
+    return "<div data-src='[" + obj.lat + "," + obj.lon + "]' data-url='" + url + "'>" + obj.name + "</div>";
+  }, 
+  altItem: function(name, url) {
+    return "<div data-url='" + url + "'>" + name + "</div>";
+  }, 
+  tableRow: function(obj) {
+    if (obj.offset == 0) {
+      var offset = "On time";
+    } else { 
+      var offset = obj.offset + " mins";
+    }
+    var time = new Date(obj.time).toLocaleTimeString();
+    return "<tr><td>" + obj.destination.substr(0,15) + " ("+obj.route + ")</td><td>" + time + "</td><td>" + offset + "</td></tr>";
   }
 };
 
@@ -17,6 +29,7 @@ $(document).ready(function() {
   window.$busView = $(".bus-view");
   window.$stopView = $(".stop-view");
   window.$nearbyView = $(".nearby-view");
+  window.$recentView = $(".recent-view");
   window.$aboutView = $(".about-view");
 
   window.$viewWrapper = $(".view-wrapper");
@@ -66,7 +79,8 @@ $(document).ready(function() {
   .on("focus", ".search", function(){
     var $this = $(this);
     $this.siblings(".search-label").css("opacity", 1);
-    $this.siblings(".placeholder").css("opacity", 0);
+    $this.siblings(".placeholder").css("opacity", 0);    
+    $this.parent(".placeholder").css("opacity", 0);
   })
   .on("blur", ".search", function(){
     var $this = $(this);
@@ -87,10 +101,24 @@ $(document).ready(function() {
     $this.find(".search").focus();
   }).on("mouseover", ".items div", function(data){
     var id = $(this).data("src");
-    currentMarkers[id].setOpacity(1);
+    if(id in currentMarkers) currentMarkers[id].setOpacity(1);
   }).on("mouseout", ".items div", function(data){
     var id = $(this).data("src");
-    currentMarkers[id].setOpacity(.5);
+    if(id in currentMarkers) currentMarkers[id].setOpacity(.5);
+  }).on("click", ".items div", function(data){ 
+    console.log("!");
+    var id = $(this).data("src");
+    var url = $(this).data("url");   
+    if(id in currentMarkers) { 
+      var marker = currentMarkers[id];
+      var latLng = marker.getLatLng();
+      var coords = [latLng.lat, latLng.lng];
+      console.log(coords);
+      marker.setOpacity(1);
+      focusMarker(marker);     
+      storeVisitedStop(url.split("/")[2], coords);
+    }
+    loadLocation(url); 
   });
 
   var plotPoint = function (lat, long, extra) {
@@ -114,7 +142,7 @@ function loadLocation(url, newWindow) {
 function initializeLocation(state, newWindow) {
   var location = state[0];
   if(location == "stop"){
-    loadStop();
+    initializeStop(state[1], newWindow);
   } else if (location == "bus") {
     initializeBus(state[1], newWindow);
   } else if (location == "search") {
@@ -123,6 +151,10 @@ function initializeLocation(state, newWindow) {
     initializeNearby(newWindow);
   } else if (location == "about") {
     initializeAbout(newWindow);
+  } else if (location == "stop") {
+    initializeStop(state[1], newWindow);
+  } else if (location == "recent") {
+    initializeRecent();
   }
 }
 
@@ -131,16 +163,92 @@ function initializeAbout (query) {
   resetLocation();
 }
 
+function initializeRecent (query) {
+  setCurrentView("recent");
+  var stops = JSON.parse(localStorage.getItem("stops"));
+  var $this = $(".view-wrapper .recent-view:last");
+  var list = $this.find(".items");
+  list.html("");
+  if(stops != null){
+    var len = stops.length;
+    if(len > 0) {
+      for(var i = len-1; i >= 0; i--) {
+        var url = "/stop/" + stops[i].id;
+        list.append(templates.altItem(stops[i].name, url));
+      }
+    } else {
+      list.html("No recent stops");
+    }
+  } else {
+    list.html("No recent stops");
+  }
+
+}
+
 function initializeBus(query) {
   setCurrentView("bus");
 }
 
+function initializeStop(query) {
+  var call = "/api/stops/schedules";
+  if(query != null) {
+    $.getJSON(call, {stopId: query}, function(data){ 
+      setCurrentView("stop");
+      var $this = $(".view-wrapper .view:last");
+
+      var title = "Stop #" + query;
+      $this.find(".title").html(title);
+
+      var latest = data[0];
+      var schedule = data.slice(1,6);
+ 
+      
+      if(data.length> 0){
+        $this.find(".route .data").html(latest.route);
+    
+        if (latest.offset == 0) {
+          var offset = "On time";
+        } else { 
+          var offset = latest.offset + " mins";
+        }
+        $this.find(".delay .data").html(offset);
+        var time = new Date(latest.time).toLocaleTimeString();
+        $this.find(".arrival .data").html(time);        
+        if(latest.destination != "")
+          $this.find(".destination .data").html(latest.destination);        
+        else
+          $this.find(".destination").html("");
+  
+        var table = $this.find("table").html("");
+
+        for(var index in schedule){
+          table.append(templates.tableRow(schedule[index]));
+        }
+      } else {
+        $this.html("");
+        $this.append("<div class='title'>Inactive Stop</div>");
+      }
+
+    
+    });
+
+    
+  }
+   
+} 
+
 function initializeNearby() { 
-  var $this = $(".view-wrapper .nearby:last");
+
+  clearMarkers();
   setCurrentView("nearby");
 
+  var $this = $(".view-wrapper .nearby-view:last");
+  var $items = $this.find(".items");
+  $items.html("");
+
+  window.cc = $this;
+
   navigator.geolocation.getCurrentPosition(function(position) {
-    console.log("position");
     var coords = [position.coords.latitude, position.coords.longitude];
     if(coords != null) {
       map.setView(coords, 16, {pan: {animate: true}});
@@ -148,27 +256,36 @@ function initializeNearby() {
 
     var loc = "/api/stops/nearby";            
 
+
     $.getJSON(loc, {lat:coords[0] , long:coords[1]}, function(data){
       var newMarkers = {};
-      clearMarkers();
       for(var index in data) {
-        console.log(data[index]);
         var obj = data[index];
-        newMarkers[""+[obj.lat, obj.lon]] = L.marker([obj.lat, obj.lon]);
-        bulkPlot(newMarkers);
+        var url = "/stop/" + obj.id;
+        $items.append(templates.resultItem(obj, url));
+        var marker = L.marker([obj.lat, obj.lon]);
+        marker.on('click', function(){
+          focusMarker(this);
+          loadLocation(url);
+        })
+        .on('mouseover', function(){ this.setOpacity(1);})
+        .on('mouseout', function(){ this.setOpacity(.5);})
+        newMarkers[""+[obj.lat, obj.lon]] = marker;
       }
+      bulkPlot(newMarkers);
     });
 
   }, function() {
-    console.log("errorrrrr");  
+    console.log("error");  
   });
 }
 
 function initializeSearch(q, newWindow) {
-    console.log(q);
-    console.log(newWindow);
-    if(q)      
+    resetLocation();
+    if(q) {
       var query = q.split("+").join(" ");
+      query = query.split("%20").join(" ");
+    }
     if(newWindow) {
       setCurrentView("search");
       if(query) currentView.find(".search").val(query);
@@ -209,8 +326,16 @@ function initializeSearch(q, newWindow) {
               clearMarkers();
               for(var index in data) {
                 var obj = data[index];
-                $resultItems.append(templates.resultItem(obj));
-                newMarkers[""+[obj.lat, obj.lon]] = L.marker([obj.lat, obj.lon]);
+                var url = "/stop/" + obj.id;
+                $resultItems.append(templates.resultItem(obj, url));
+                var marker = L.marker([obj.lat, obj.lon]);
+                newMarkers[""+[obj.lat, obj.lon]] = marker;
+                marker.on('click', function(){
+                  focusMarker(this);
+                  loadLocation(url);
+                })
+                .on('mouseover', function(){ this.setOpacity(1);})
+                .on('mouseout', function(){ this.setOpacity(.5);})
               }
               bulkPlot(newMarkers);
               $view.height(defaultHeight + $results.height());
@@ -250,23 +375,18 @@ function setCurrentView(view, obj) {
     currentView = $aboutView.clone();
   } else if (view == "nearby") {
     currentView = $nearbyView.clone();
+  } else if (view == "recent") {
+    currentView = $recentView.clone();
   }
   showCurrentView();
 }
 
-function setBreadcrumb(url){
-  
-}
-
 window.onpopstate = function() {
   var currentState;
-  console.log("THE STATE GOES POP POP");
   if(history.state != null) {
-    console.log("UR HISTORY");
-    console.log(history.state.location);
     initializeLocation(history.state.location, true);
   } else {
-    loadLocation(document.location.pathname);
+    loadLocation(document.location.pathname, true);
   }  
 }
  
@@ -282,20 +402,49 @@ window.onpopstate = function() {
   var bulkPlot = function(list) {
     currentMarkers = list;
     for(var i in list) {
-      list[i].setOpacity(.6);
+      list[i].setOpacity(.5);
       map.addLayer(list[i]);
     }
   }  
 
   var clearMarkers = function() {
-    console.log(currentMarkers);
     for(var i in currentMarkers) {
       map.removeLayer(currentMarkers[i]);
     }
     currentMarkers = {};
   }
 
+  var focusMarker = function(marker) {
+      clearMarkers();
+      currentMarkers = {"focus": marker};
+      map.addLayer(marker);
+      var latlng = marker.getLatLng();
+      map.setView(latlng, 17);
+  }
+
   var resetLocation = function () {
     clearMarkers();
     map.setView(PHILLY_COORDS, 12);
+  }
+
+  var storeVisitedStop = function(stop,latlng) {
+    var obj = JSON.parse(localStorage.getItem("stops"));
+    if(obj == null){
+      obj = [];
+    }
+    var newStop = {
+      id: stop,
+      name: "Stop #" + stop,
+      coords: latlng
+    }
+    console.log(obj);
+    if(""+stop in obj)
+      delete obj[stop];
+    obj.push(newStop);
+    localStorage.setItem("stops", JSON.stringify(obj));
+  }
+
+  var resetStorage = function() {
+    localStorage.setItem("stops", JSON.stringify(null));
+  
   }
