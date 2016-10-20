@@ -130,13 +130,13 @@ $(document).ready(function() {
 });
 
 function loadLocation(url, newWindow) {
-  var parsed = url.split("/").slice(1);
+  /*var parsed = url.split("/").slice(1);
   console.log(parsed);
   var state = {
     location: parsed
   }
   history.pushState(state, "PhillyBusFinder", url);
-  initializeLocation(parsed, newWindow);
+  initializeLocation(parsed, newWindow);*/
 }
 
 function initializeLocation(state, newWindow) {
@@ -226,8 +226,8 @@ function initializeStop(query) {
           table.append(templates.tableRow(schedule[index]));
         }
       } else {
-        $this.html("");
-        $this.append("<div class='title'>Inactive Stop</div>");
+
+        $this.html("<div class='title'>" + title + "</div><div>There are currently no active buses for this stop.</div>");
       }
 
     
@@ -384,11 +384,11 @@ function setCurrentView(view, obj) {
 
 window.onpopstate = function() {
   var currentState;
-  if(history.state != null) {
+  /*if(history.state != null) {
     initializeLocation(history.state.location, true);
   } else {
     loadLocation(document.location.pathname, true);
-  }  
+  } */
 }
  
 
@@ -447,5 +447,5 @@ window.onpopstate = function() {
 
   var resetStorage = function() {
     localStorage.setItem("stops", JSON.stringify(null));
-  
+
   }
